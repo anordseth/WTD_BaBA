@@ -45,9 +45,11 @@ The attribute fields the scripts rely on are the standard NTD schema (`permanent
 
 ## Running the code
 
-Run the numbered scripts in order. Each reads from `7_Dryad_Upload/data/` (or the previous script's output in `1_Data/revisions/`) and writes to `1_Data/revisions/`. Figure and table scripts can be run in any order once the numbered scripts have finished.
+Run the numbered scripts in order. Each reads from `7_Dryad_Upload/data/` (or the previous script's output in `1_Data/revisions/`) and writes to `1_Data/revisions/`.
 
 `01` takes roughly an hour on 1.6 million fixes.
+
+This repository covers the main analyses only — the scripts that generate the manuscript's figures and formatted tables are not included here.
 
 ## Pipeline
 
@@ -64,29 +66,6 @@ Run the numbered scripts in order. Each reads from `7_Dryad_Upload/data/` (or th
 | `10_inter_encounter_intervals.R` | Time between successive encounters, used to check encounter independence | `02` | Console summary |
 
 Encounter rates are calculated in `04`, alongside the tracking summaries they depend on.
-
-## Figures (`figures/`)
-
-Files beginning with `_` are shared helpers, not run on their own. `_colors.R` holds the palettes and `_site_panel_base.R` builds the common map frame so every site panel is comparable.
-
-| Script | Produces |
-|---|---|
-| `fig1_study_site.R` | Fig. 1, land cover, roads, and example tracks |
-| `fig2_site_comparison.R` | Fig. 2, road density, encounter rate, encounter types, impermeability |
-| `fig3_model_results.R` | Fig. 3, odds ratios and predicted probabilities |
-| `fig4_video_behavior.R` | Fig. 4, video behavior by encounter category |
-| `figS1_track_overview.R` | Fig. S1, GPS tracks over the road network |
-| `figS2_trajectory_examples.R` | Fig. S2, example trajectories per encounter type |
-| `figS3_impermeability_map.R` | Fig. S3, impermeability mapped onto road segments |
-| `figS4_buffer_sensitivity.R` | Fig. S4, encounter detection across buffer sizes |
-
-The track figures read the per-animal `{animal}_track2.csv` files written by `01`. Those are written before the DOP filter, so plotted tracks include a small number of fixes the analysis excluded.
-
-`fig1_study_site.R` sources `figS1_track_overview.R` to reuse its track selection.
-
-## Tables (`tables/`)
-
-`table_model_selection.R` and `table_model_coefficients.R` format model output as Word tables. Run after `06` and `07`. The individual data summary table comes from `04`.
 
 ## Encounter categories
 
