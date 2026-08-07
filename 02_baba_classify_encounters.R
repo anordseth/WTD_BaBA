@@ -13,10 +13,9 @@
 #     does not affect bounce or quick cross)
 #   - Saves per-site Rdata files plus combined BaBA_all_AEN.Rdata
 #   - Added encounter frequency summary for Fig 2
-# AEN 08-06-26: deer_meta.csv now read from the deposit folder. The road
-#   shapefiles are NOT part of the Dryad deposit (public USGS National
-#   Transportation Dataset geometry, not redistributed) — obtain and prepare
-#   them yourself; see the "Spatial data setup" section in this repo's README.
+# AEN 08-06-26: deer_meta.csv now read from the deposit folder. Road shapefiles
+#   aren't in the deposit (public USGS NTD geometry, not redistributed) — see
+#   README's spatial data setup section
 
 # Load libraries
 library(tidyverse)

@@ -3,8 +3,8 @@
 # (2) DHARMa testTemporalAutocorrelation on model255 residuals
 # Supports response to R2-M4 (temporal autocorrelation concern).
 # AEN 05-26-26
-# AEN 08-06-26: switched to the merged deposit file (road_encounter_covariates.csv);
-#   see 06_logistic_model.R for the equivalent-join verification.
+# AEN 08-06-26: now reads road_encounter_covariates.csv directly (see 06 for the
+#   old join it replaces)
 
 library(tidyverse)
 library(glmmTMB)

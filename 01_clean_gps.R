@@ -5,10 +5,8 @@
 # AEN 05-11-26: updated input to full dataset (Jan 2023 - Mar 2025)
 # AEN 07-30-26: merged the former 01b (analysis-set restriction + DOP filter)
 #   into this script so all GPS cleaning happens in one place
-# AEN 08-06-26: switched to the deposited, pre-filtered GPS input (already
-#   restricted to the 125-animal analysis set) and the merged covariate file
-#   for the animal-ID crosswalk. Part B's restriction step is now a no-op check
-#   rather than an actual filter, but is left in place as a safeguard.
+# AEN 08-06-26: input is now the pre-filtered 125-animal deposit file; Part B's
+#   restriction is a no-op safeguard now, not a real filter
 #
 # Part A (steps I-V) is the fix-level cleaning adapted from Dani Berger's code and
 # mirrors Leyna's original pipeline. Part B is new in the revision: it confirms the
@@ -188,12 +186,10 @@ write_rds(gps_cleaned_df,  file.path(out_dir, "all_23-25_GPS_cleandf.rds"))
 gps_df <- gps_cleaned_df
 
 # VI. Confirm the 125-animal analysis set
-# The GPS input above is already restricted to the 125-animal analysis set
-# (see 7_Dryad_Upload/dryad_manifest.md). This step re-derives the same animal
-# list from road_encounter_covariates.csv (D-format IDs, mapped to usdaIDs via
-# ID.1 in deer_meta.csv) and filters again as a safeguard — it should be a no-op.
-# ILTN1049 appears in the covariate file as D1124 (recaptured animal given a new
-# low tag); ID.1 resolves it.
+# GPS input is already restricted to 125 animals; this re-derives the same list
+# from road_encounter_covariates.csv (D-format IDs -> usdaIDs via ID.1) and
+# filters again as a safeguard, should be a no-op. ILTN1049 = D1124 in the
+# covariate file (recap, new low tag) — ID.1 resolves it.
 meta       <- read.csv(file.path(data_dir, "deer_meta.csv"))
 analysis_ids <- unique(read.csv(file.path(data_dir,
   "road_encounter_covariates.csv"))$AnimalID)

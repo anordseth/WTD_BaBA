@@ -2,11 +2,10 @@
 # AIC-based selection between linear and log-transformed land cover / road density terms.
 # AEN 05-22-26; revised 07-06-26 (AIC-based selection between linear and log
 # land cover / road density terms; removed combined linear+log model per AE comment)
-# AEN 08-06-26: switched to the merged deposit file (road_encounter_covariates.csv).
-#   Previously this script joined two derived files to correct road_category;
-#   that join is now done once at deposit time — see 7_Dryad_Upload/dryad_manifest.md.
-#   Road category: L = large (primary/secondary/motorway), M = medium
-#   (tertiary/unclassified/residential), S = small, per OSM (2024) classification.
+# AEN 08-06-26: now reads road_encounter_covariates.csv directly — used to join
+#   two derived files here to fix road_category, that's done once at deposit time now.
+#   road_category: L = large (primary/secondary/motorway), M = medium
+#   (tertiary/unclassified/residential), S = small, per OSM (2024)
 
 library(tidyverse)
 library(glmmTMB)
