@@ -16,8 +16,7 @@ library(here)
 
 data_dir <- here("7_Dryad_Upload/data")
 
-# ── Load data ─────────────────────────────────────────────────────────────────
-
+# --- Load data ---
 df5 <- read.csv(file.path(data_dir, "road_encounter_covariates.csv")) %>%
   rename(site = Study_area) %>%
   mutate(
@@ -32,7 +31,7 @@ stopifnot(all(!is.na(df5$road_category)))
 cat("Road category counts:\n")
 print(table(df5$road_category))
 
-# ── Fit candidate models ──────────────────────────────────────────────────────
+# --- Fit candidate models ---
 # Two candidates: linear vs. log-transformed land cover and road density terms.
 # All other predictors (season, diel period, road category, random effects) are
 # held constant. AIC selects the transformation for the final model.
@@ -55,8 +54,7 @@ model_log <- glmmTMB(
   family = binomial(link = "logit")
 )
 
-# ── AIC comparison ────────────────────────────────────────────────────────────
-
+# --- AIC comparison ---
 aic_tab <- data.frame(
   model = c("linear", "log"),
   AIC = c(AIC(model_lin), AIC(model_log))
@@ -67,14 +65,13 @@ aic_tab
 
 write.csv(aic_tab, file.path(out_dir, "model_selection_aic.csv"), row.names = FALSE)
 
-# Select the top model
+# --- Select the top model ---
 top_model <- if (aic_tab$model[1] == "linear") model_lin else model_log
 
 summary(top_model)
 diagnose(top_model)
 
-# ── Save model coefficients ───────────────────────────────────────────────────
-
+# --- Save model coefficients ---
 coef_mat <- summary(top_model)$coefficients$cond
 coefs <- as.data.frame(coef_mat) %>%
   tibble::rownames_to_column("term") %>%
@@ -87,16 +84,14 @@ coefs <- as.data.frame(coef_mat) %>%
 
 write.csv(coefs, file.path(out_dir, "model_top_coefs.csv"), row.names = FALSE)
 
-# ── Model diagnostics ─────────────────────────────────────────────────────────
-
+# --- Model diagnostics ---
 sim_res <- simulateResiduals(top_model)
 plot(sim_res)
 testDispersion(sim_res)
 
 check_collinearity(top_model)
 
-# ── Predicted probability plots ───────────────────────────────────────────────
-
+# --- Predicted probability plots ---
 pr_road <- ggpredict(top_model, "road_category", bias_correction = TRUE)
 pr_season <- ggpredict(top_model, "season", bias_correction = TRUE)
 pr_time <- ggpredict(top_model, "time.cat", bias_correction = TRUE)

@@ -13,9 +13,9 @@
 #     does not affect bounce or quick cross)
 #   - Saves per-site Rdata files plus combined BaBA_all_AEN.Rdata
 #   - Added encounter frequency summary for Fig 2
-# AEN 08-06-26: deer_meta.csv now read from the deposit folder. Road shapefiles
-#   aren't in the deposit (public USGS NTD geometry, not redistributed) — see
-#   README's spatial data setup section
+# AEN 08-10-26: dropped the unused deer_meta.csv read. Road shapefiles aren't in
+#   the deposit (public USGS NTD geometry, not redistributed) — see README's
+#   spatial data setup section
 
 # Load libraries
 library(tidyverse)
@@ -33,16 +33,16 @@ library(mapview)
 library(epiDisplay)
 
 data_dir <- here("1_Data/leyna_data")       # road shapefiles — see note above
-deposit_dir <- here("7_Dryad_Upload/data")  # deer_meta.csv
+deposit_dir <- here("7_Dryad_Upload/data")  # GPS_cleaned_analysisset_125animals.csv
 out_dir <- here("1_Data/revisions")
 
-gps_cleaned_df <- readRDS(file.path(out_dir, "all_23-25_GPS_cleandf_v2.rds"))
-deer_meta <- read.csv(file.path(deposit_dir, "deer_meta.csv"))
+gps_cleaned_df <- read.csv(file.path(deposit_dir, "GPS_cleaned_analysisset_125animals.csv"))
+gps_cleaned_df$t_ <- as.POSIXct(gps_cleaned_df$t_, format = "%Y-%m-%d %H:%M:%S", tz = "GMT")
 
 cat("--- Input ---\n")
 cat("Animals:", length(unique(gps_cleaned_df$animal_id)), "\n")
 
-# Study_area carried through from script 01 via make_track
+# Study_area carried through from the GPS-cleaning step (not published here) via make_track
 # Note: short-track animals (ILSI1201, ILSV1185, ILTN1142, ILTN3229) are present in
 # Leyna's 125 — do not filter by track duration. Monitor for BaBA errors on these animals.
 
@@ -65,22 +65,22 @@ prep_gps <- function(df) {
 
 d <- 50
 
-# ── SIU ───────────────────────────────────────────────────────────────────────
+# --- SIU ---
 gps_SIU <- prep_gps(subset(gps_cleaned_df, Study_area == "SIUC"))
 BaBA_SIU <- BaBA(gps_SIU, shp_roadSouth, d, interval = 0.5, b_time = 4, p_time = 36, w = 168,
                  tolerance = 0, units = "hours", max_cross = 2, sd_multiplier = 1,
                  exclude_buffer = FALSE, round_fixes = FALSE, export_images = FALSE)
 save(BaBA_SIU, file = file.path(out_dir, "BaBA_SIU_AEN.Rdata"))
 
-# ── TON ───────────────────────────────────────────────────────────────────────
+# --- TON ---
 gps_TON <- prep_gps(subset(gps_cleaned_df, Study_area == "Touch of Nature"))
 BaBA_TON <- BaBA(gps_TON, shp_roadSouth, d, interval = 0.5, b_time = 4, p_time = 36, w = 168,
                  tolerance = 0, units = "hours", max_cross = 2, sd_multiplier = 1,
                  exclude_buffer = FALSE, round_fixes = FALSE, export_images = FALSE)
 save(BaBA_TON, file = file.path(out_dir, "BaBA_TON_AEN.Rdata"))
 
-# ── LSV ───────────────────────────────────────────────────────────────────────
-gps_LSV   <- prep_gps(subset(gps_cleaned_df, Study_area == "Shelbyville"))
+# --- LSV ---
+gps_LSV <- prep_gps(subset(gps_cleaned_df, Study_area == "Shelbyville"))
 individs_LSV <- levels(factor(gps_LSV$Animal.ID))
 
 lsv_results  <- list()
@@ -115,7 +115,7 @@ enc_LSV <- do.call(rbind, lsv_results)
 BaBA_LSV <- list(classification = enc_LSV)
 save(BaBA_LSV, file = file.path(out_dir, "BaBA_LSV_AEN.Rdata"))
 
-# ── Combine and save ──────────────────────────────────────────────────────────
+# --- Combine and save ---
 enc_SIU <- BaBA_SIU$classification; enc_SIU$Study_area <- "SIUC"
 enc_TON <- BaBA_TON$classification; enc_TON$Study_area <- "Touch of Nature"
 enc_LSV <- BaBA_LSV$classification; enc_LSV$Study_area <- "Shelbyville"
@@ -131,7 +131,7 @@ cat("LSV:", nrow(enc_LSV), "\n")
 cat("Total:", nrow(BaBA_all), "(expect ~110,000)\n")
 print(table(BaBA_all$eventTYPE))
 
-# ── Encounter frequency summary ───────────────────────────────────────────────
+# --- Encounter frequency summary ---
 freq_summary <- BaBA_all %>%
   count(Study_area, eventTYPE) %>%
   group_by(Study_area) %>%
@@ -141,4 +141,3 @@ freq_summary
 write.csv(freq_summary, file.path(out_dir, "freq_summary_AEN.csv"), row.names = FALSE)
 
 ##FXNS - source kept in leyna_scripts/BaBA_deer_SIUcondense_github.R for reference #AEN 05-06-26
-

@@ -20,16 +20,16 @@ library(here)
 
 data_dir <- here("1_Data/leyna_data")
 out_dir  <- here("1_Data/revisions")
+deposit_dir <- here("7_Dryad_Upload/data")
 
-# ── Load GPS data and subset to the parameter-testing window ──────────────────
-
-gps <- readRDS(file.path(out_dir, "all_23-25_GPS_cleandf_v2.rds")) %>%
+# --- Load GPS data and subset to the parameter-testing window ---
+gps <- read.csv(file.path(deposit_dir, "GPS_cleaned_analysisset_125animals.csv")) %>%
+  mutate(t_ = as.POSIXct(t_, format = "%Y-%m-%d %H:%M:%S", tz = "GMT")) %>%
   filter(t_ >= as.POSIXct("2023-01-01", tz = "UTC"),
          t_ <= as.POSIXct("2024-08-31", tz = "UTC"))
 cat("Subset fixes:", nrow(gps), " animals:", length(unique(gps$animal_id)), "\n")
 
-# ── Roads (South = SIU, TON; North = LSV) ─────────────────────────────────────
-
+# --- Roads (South = SIU, TON; North = LSV) ---
 spatial_dir <- file.path(data_dir, "spatial")
 unzip(file.path(spatial_dir, "Trans_Road_Sroadsutm.zip"), exdir = spatial_dir, overwrite = FALSE)
 unzip(file.path(spatial_dir, "Trans_Road_Nroadsutm.zip"), exdir = spatial_dir, overwrite = FALSE)
@@ -48,8 +48,7 @@ gps_LSV <- prep_gps(subset(gps, Study_area == "Shelbyville"))
 # (same handling as 02_baba_classify_encounters.R).
 lsv_override <- c(ILSV1185 = 1)
 
-# ── BaBA wrappers (settings identical to script 02) ───────────────────────────
-
+# --- BaBA wrappers (settings identical to script 02) ---
 run_baba <- function(g, roads, d, iv = 0.5) {
   tryCatch(
     BaBA(g, roads, d, interval = iv, b_time = 4, p_time = 36, w = 168,
@@ -67,8 +66,7 @@ run_lsv <- function(g, roads, d) {
   if (length(res)) do.call(rbind, res) else NULL
 }
 
-# ── Loop over buffer distances, tally event types per site ────────────────────
-
+# --- Loop over buffer distances, tally event types per site ---
 ba_types <- c("Quick_Cross", "Average_Movement", "Bounce",
               "Back_n_forth", "Trace", "Trapped", "unknown")
 
@@ -91,8 +89,7 @@ for (d in buffers) {
             row.names = FALSE)
 }
 
-# ── Summary: encounter detection relative to the 50 m value ───────────────────
-
+# --- Summary: encounter detection relative to the 50 m value ---
 res <- bind_rows(rows)
 cat("\n===== total encounters and quick cross, as % of the 50 m value =====\n")
 res %>% group_by(site) %>% arrange(buffer) %>%
